@@ -66,7 +66,7 @@ def _create_and_start_container(
         name=model_id,
         image=config.CONTAINER_IMAGE,
         resources=container_resource_requirements,
-        command=f"/opt/docker_run.py {model_id}.json",
+        command=[f"/opt/docker_run.py {model_id}.json"],
     )
 
     image_registry_credentials = [
