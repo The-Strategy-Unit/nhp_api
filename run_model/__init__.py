@@ -93,4 +93,4 @@ def _create_and_start_container(
     client.container_groups.begin_create_or_update(
         "nhp_containers", f"{model_id}", cgroup
     )
-    logging.info("container created")
+    logging.info("container created with command: %s", container.command)
