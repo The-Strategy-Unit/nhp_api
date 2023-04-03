@@ -4,6 +4,7 @@
 import logging
 
 import azure.functions as func
+from azure.core.exceptions import ResourceExistsError
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerinstance import ContainerInstanceManagementClient
 from azure.mgmt.containerinstance.models import (
@@ -44,8 +45,11 @@ def _upload_params_to_blob(
 ) -> None:
     client = BlobServiceClient(config.STORAGE_ENDPOINT, credential)
     container = client.get_container_client("queue")
-    container.upload_blob(f"{model_id}.json", params)
-    logging.info("params uploaded to queue")
+    try:
+        container.upload_blob(f"{model_id}.json", params)
+        logging.info("params uploaded to queue")
+    except ResourceExistsError:
+        logging.warn("file already exists, skipping upload")
 
 
 def _create_and_start_container(
