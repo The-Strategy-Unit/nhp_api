@@ -66,7 +66,7 @@ def _create_and_start_container(
         name=model_id,
         image=config.CONTAINER_IMAGE,
         resources=container_resource_requirements,
-        command=[f"/opt/docker_run.py {model_id}.json"],
+        command=["/opt/docker_run.py", f"{model_id}.json"],
     )
 
     image_registry_credentials = [
@@ -97,4 +97,4 @@ def _create_and_start_container(
     client.container_groups.begin_create_or_update(
         "nhp_containers", f"{model_id}", cgroup
     )
-    logging.info("container created with command: %s", container.command)
+    logging.info("container created with command: %s", " ".join(container.command))
