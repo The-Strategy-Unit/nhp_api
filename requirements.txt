@@ -6,3 +6,4 @@ azure-functions
 azure-identity
 azure-mgmt-containerinstance
 azure-storage-blob
+python-dotenv
