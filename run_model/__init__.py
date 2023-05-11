@@ -24,10 +24,13 @@ import config
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """main api endpoint"""
+
+    app_version = req.params.get("app_version", "latest")
+
     model_id = req.get_json()["id"]
     params = req.get_body()
 
-    logging.info("received request for model run: %s", model_id)
+    logging.info("received request for model run %s (%s)", model_id, app_version)
 
     credential = DefaultAzureCredential()
 
@@ -35,7 +38,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     _upload_params_to_blob(model_id, params, credential)
 
     # 2. create a new container instance
-    _create_and_start_container(model_id, credential)
+    _create_and_start_container(model_id, credential, app_version)
 
     return func.HttpResponse(f"submitted {model_id}")
 
@@ -49,11 +52,11 @@ def _upload_params_to_blob(
         container.upload_blob(f"{model_id}.json", params)
         logging.info("params uploaded to queue")
     except ResourceExistsError:
-        logging.warn("file already exists, skipping upload")
+        logging.warning("file already exists, skipping upload")
 
 
 def _create_and_start_container(
-    model_id: str, credential: DefaultAzureCredential
+    model_id: str, credential: DefaultAzureCredential, tag: str = "latest"
 ) -> None:
     client = ContainerInstanceManagementClient(credential, config.SUBSCRIPTION_ID)
 
@@ -64,7 +67,7 @@ def _create_and_start_container(
 
     container = Container(
         name=model_id,
-        image=config.CONTAINER_IMAGE,
+        image=f"{config.CONTAINER_IMAGE}:{tag}",
         resources=container_resource_requirements,
         command=["/opt/docker_run.py", f"{model_id}.json"],
     )
