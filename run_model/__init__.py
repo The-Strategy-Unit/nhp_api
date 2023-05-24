@@ -25,39 +25,50 @@ import config
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """main api endpoint"""
 
-    app_version = req.params.get("app_version", "latest")
+    metadata = {
+        k: str(v)
+        for k, v in req.get_json().items()
+        if not isinstance(v, dict) and not isinstance(v, list)
+    }
+    metadata["app_version"] = req.params.get("app_version", "latest")
 
-    model_id = req.get_json()["id"]
     params = req.get_body()
 
-    logging.info("received request for model run %s (%s)", model_id, app_version)
+    logging.info(
+        "received request for model run %s (%s)",
+        metadata["id"],
+        metadata["app_version"],
+    )
 
     credential = DefaultAzureCredential()
 
     # 1. upload params to blob storage
-    _upload_params_to_blob(model_id, params, credential)
+    _upload_params_to_blob(params, metadata, credential)
 
     # 2. create a new container instance
-    _create_and_start_container(model_id, credential, app_version)
+    _create_and_start_container(metadata, credential)
 
-    return func.HttpResponse(f"submitted {model_id}")
+    return func.HttpResponse(f"submitted {metadata['id']}")
 
 
 def _upload_params_to_blob(
-    model_id: str, params: dict, credential: DefaultAzureCredential
+    params: dict, metadata: dict, credential: DefaultAzureCredential
 ) -> None:
     client = BlobServiceClient(config.STORAGE_ENDPOINT, credential)
     container = client.get_container_client("queue")
     try:
-        container.upload_blob(f"{model_id}.json", params)
+        container.upload_blob(f"{metadata['id']}.json", params, metadata=metadata)
         logging.info("params uploaded to queue")
     except ResourceExistsError:
         logging.warning("file already exists, skipping upload")
 
 
 def _create_and_start_container(
-    model_id: str, credential: DefaultAzureCredential, tag: str = "latest"
+    metadata: dict, credential: DefaultAzureCredential
 ) -> None:
+    model_id = metadata["id"]
+    tag = metadata["app_version"]
+
     client = ContainerInstanceManagementClient(credential, config.SUBSCRIPTION_ID)
 
     container_resource_requests = ResourceRequests(memory_in_gb=2.5, cpu=4)
