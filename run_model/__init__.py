@@ -71,7 +71,9 @@ def _create_and_start_container(
 
     client = ContainerInstanceManagementClient(credential, config.SUBSCRIPTION_ID)
 
-    container_resource_requests = ResourceRequests(memory_in_gb=2.5, cpu=4)
+    container_resource_requests = ResourceRequests(
+        memory_in_gb=config.CONTAINER_MEMORY, cpu=config.CONTAINER_CPU
+    )
     container_resource_requirements = ResourceRequirements(
         requests=container_resource_requests
     )
