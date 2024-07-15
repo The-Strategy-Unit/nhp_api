@@ -61,9 +61,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # 2. create a new container instance
     _create_and_start_container(metadata, credential)
 
-    return func.HttpResponse(
-        json.dumps({"submitted": metadata["id"]}), mimetype="application/json"
-    )
+    return func.HttpResponse(json.dumps(metadata), mimetype="application/json")
 
 
 def _generate_id(params: str, metadata: dict) -> str:
