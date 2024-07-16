@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import zlib
-from datetime import UTC, datetime
+from datetime import datetime
 
 import azure.functions as func
 from azure.core.exceptions import ResourceExistsError
@@ -33,7 +33,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     params = req.get_json()
     if "id" in params:
         params.pop("id")
-    params["create_datetime"] = f"{datetime.now(UTC):%Y%m%d_%H%M%S}"
+    params["create_datetime"] = f"{datetime.utcnow():%Y%m%d_%H%M%S}"
 
     metadata = {
         k: str(v)
