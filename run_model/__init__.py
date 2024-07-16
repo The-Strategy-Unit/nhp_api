@@ -1,7 +1,12 @@
 """API endpoint for running the NHP Model
 
 """
+
+import json
 import logging
+import re
+import zlib
+from datetime import datetime
 
 import azure.functions as func
 from azure.core.exceptions import ResourceExistsError
@@ -25,14 +30,22 @@ import config
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """main api endpoint"""
 
+    params = req.get_json()
+    if "id" in params:
+        params.pop("id")
+    params["create_datetime"] = f"{datetime.utcnow():%Y%m%d_%H%M%S}"
+
     metadata = {
         k: str(v)
-        for k, v in req.get_json().items()
+        for k, v in params.items()
         if not isinstance(v, dict) and not isinstance(v, list)
     }
-    metadata["app_version"] = req.params.get("app_version", "latest")
+    params["app_version"] = metadata["app_version"] = req.params.get(
+        "app_version", "latest"
+    )
 
-    params = req.get_body()
+    params = json.dumps(params)
+    metadata["id"] = _generate_id(params, metadata)
 
     logging.info(
         "received request for model run %s (%s)",
@@ -48,7 +61,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # 2. create a new container instance
     _create_and_start_container(metadata, credential)
 
-    return func.HttpResponse(f"submitted {metadata['id']}")
+    return func.HttpResponse(json.dumps(metadata), mimetype="application/json")
+
+
+def _generate_id(params: str, metadata: dict) -> str:
+    crc32 = f"{zlib.crc32(params.encode('utf-8')):x}"
+    scenario_sanitized = re.sub("[^a-z0-9]+", "-", metadata["scenario"])
+    # id needs to be of length 1-63, but the last 9 characters are a - and the hash
+    return (f"{metadata['dataset']}-{scenario_sanitized}"[0:54] + "-" + crc32).lower()
 
 
 def _upload_params_to_blob(
