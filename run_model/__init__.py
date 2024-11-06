@@ -128,6 +128,7 @@ def _create_and_start_container(
         image_registry_credentials=image_registry_credentials,
         restart_policy="Never",
         subnet_ids=[subnet],
+        tags={"project": "nhp"}
     )
 
     client.container_groups.begin_create_or_update(
