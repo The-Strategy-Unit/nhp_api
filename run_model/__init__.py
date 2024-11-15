@@ -44,6 +44,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         "app_version", "latest"
     )
 
+    save_full_model_results = (
+        req.params.get("save_full_model_results", "").lower() == "true"
+    )
+
     params = json.dumps(params)
     metadata["id"] = _generate_id(params, metadata)
 
@@ -59,7 +63,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     _upload_params_to_blob(params, metadata, credential)
 
     # 2. create a new container instance
-    _create_and_start_container(metadata, credential)
+    _create_and_start_container(metadata, credential, save_full_model_results)
 
     return func.HttpResponse(json.dumps(metadata), mimetype="application/json")
 
@@ -84,7 +88,9 @@ def _upload_params_to_blob(
 
 
 def _create_and_start_container(
-    metadata: dict, credential: DefaultAzureCredential
+    metadata: dict,
+    credential: DefaultAzureCredential,
+    save_full_model_results: bool = False,
 ) -> None:
     model_id = metadata["id"]
     tag = metadata["app_version"]
@@ -102,7 +108,11 @@ def _create_and_start_container(
         name=model_id,
         image=f"{config.CONTAINER_IMAGE}:{tag}",
         resources=container_resource_requirements,
-        command=["/opt/docker_run.py", f"{model_id}.json"],
+        command=[
+            "/opt/docker_run.py",
+            f"{model_id}.json",
+            "--save-full-model-results" if save_full_model_results else "",
+        ],
     )
 
     image_registry_credentials = [
@@ -128,7 +138,7 @@ def _create_and_start_container(
         image_registry_credentials=image_registry_credentials,
         restart_policy="Never",
         subnet_ids=[subnet],
-        tags={"project": "nhp"}
+        tags={"project": "nhp"},
     )
 
     client.container_groups.begin_create_or_update(
