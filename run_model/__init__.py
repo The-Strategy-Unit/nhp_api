@@ -111,7 +111,8 @@ def _create_and_start_container(
         command=[
             "/opt/docker_run.py",
             f"{model_id}.json",
-            "--save-full-model-results" if save_full_model_results else "",
+            *(["--save-full-model-results"] if save_full_model_results else []),
+
         ],
     )
 
