@@ -1,4 +1,5 @@
 """Configuration values"""
+
 # pylint: disable=line-too-long
 
 import os
@@ -21,3 +22,5 @@ CONTAINER_MEMORY = os.environ["CONTAINER_MEMORY"]
 CONTAINER_CPU = os.environ["CONTAINER_CPU"]
 
 AUTO_DELETE_COMPLETED_CONTAINERS = bool(os.getenv("AUTO_DELETE_COMPLETED_CONTAINERS"))
+
+RESOURCE_GROUP = os.environ["RESOURCE_GROUP"]

@@ -1,6 +1,4 @@
-"""API endpoint for running the NHP Model
-
-"""
+"""API endpoint for running the NHP Model"""
 
 import json
 import logging
@@ -112,7 +110,6 @@ def _create_and_start_container(
             "/opt/docker_run.py",
             f"{model_id}.json",
             *(["--save-full-model-results"] if save_full_model_results else []),
-
         ],
     )
 
@@ -143,6 +140,6 @@ def _create_and_start_container(
     )
 
     client.container_groups.begin_create_or_update(
-        "nhp_containers", f"{model_id}", cgroup
+        config.RESOURCE_GROUP, f"{model_id}", cgroup
     )
     logging.info("container created with command: %s", " ".join(container.command))

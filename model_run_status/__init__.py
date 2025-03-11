@@ -16,7 +16,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     client = ContainerInstanceManagementClient(
         DefaultAzureCredential(), config.SUBSCRIPTION_ID
     )
-    resource_group = "nhp_containers"
+    resource_group = config.RESOURCE_GROUP
 
     container = (
         client.container_groups.get(resource_group, container_id)
