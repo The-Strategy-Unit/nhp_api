@@ -1,5 +1,5 @@
-"""List all active model runs (containers)
-"""
+"""List all active model runs (containers)"""
+
 import json
 import logging
 
@@ -17,7 +17,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:  # pylint: disable=unused-
     client = ContainerInstanceManagementClient(
         DefaultAzureCredential(), config.SUBSCRIPTION_ID
     )
-    resource_group = "nhp_containers"
+    resource_group = config.RESOURCE_GROUP
 
     containers = {
         i.name: _get_container_group_instance_state(i.name, client, resource_group)
