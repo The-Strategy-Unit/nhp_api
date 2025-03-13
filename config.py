@@ -8,6 +8,9 @@ import dotenv
 
 dotenv.load_dotenv()
 
+STORAGE_ACCOUNT = os.environ["STORAGE_ACCOUNT"]
+# TODO: eventually, replace STORAGE_ENDPOINT with the below
+# STORAGE_ENDPOINT = f"https://{STORAGE_ACCOUNT}.blob.core.windows.net"
 STORAGE_ENDPOINT = os.environ["STORAGE_ENDPOINT"]
 SUBSCRIPTION_ID = os.environ["SUBSCRIPTION_ID"]
 CONTAINER_IMAGE = os.environ["CONTAINER_IMAGE"]
