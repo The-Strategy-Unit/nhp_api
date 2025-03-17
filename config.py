@@ -14,6 +14,8 @@ STORAGE_ACCOUNT = os.environ["STORAGE_ACCOUNT"]
 STORAGE_ENDPOINT = os.environ["STORAGE_ENDPOINT"]
 SUBSCRIPTION_ID = os.environ["SUBSCRIPTION_ID"]
 CONTAINER_IMAGE = os.environ["CONTAINER_IMAGE"]
+# TODO: just needed when we dual test ghcr and acr, remove when we deprecate acr
+CONTAINER_IMAGE_GHCR = os.environ["CONTAINER_IMAGE_GHCR"]
 AZURE_LOCATION = os.environ["AZURE_LOCATION"]
 SUBNET_NAME = os.environ["SUBNET_NAME"]
 SUBNET_ID = os.environ["SUBNET_ID"]
